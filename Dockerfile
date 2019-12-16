@@ -3,14 +3,10 @@
 FROM ubuntu:17.04
 
 ARG PS=parallel_studio_xe_2018_update3_cluster_edition
-
-RUN \
-    tar -xzf psxe/$PS.tgz && \
-    cd $PS && \
-    mkdir /opt/intel && \
-    cp ../psxe/psxe.lic /opt/intel/licenses && \
-    ./install.sh --silent=../psxe/silent.cfg
-
+ARG OMPI_DIR=openmpi-3.1.1
+ARG ELPAROOT=elpa
+ARG ELPA_DIR=elpa-2017.05.003
+ARG QE_DIR=qe-6.5
 ARG TOPROOT=/opt/intel
 ARG INTELROOT=$TOPROOT/compilers_and_libraries/linux
 ENV MKLROOT=$INTELROOT/mkl
@@ -23,6 +19,13 @@ ENV COMPILERVARS_PLATFORM="linux"
 ARG TARGET="SKYLAKE"
 ARG CCFLAGS="-O3 -no-prec-div -fp-model fast=2 -x${TARGET}"
 ARG FCFLAGS="-O3 -no-prec-div -fp-model fast=2 -x${TARGET} -align array64byte -threads -heap-arrays 4096"
+
+RUN \
+    tar -xzf psxe/$PS.tgz && \
+    cd $PS && \
+    mkdir /opt/intel && \
+    cp ../psxe/psxe.lic /opt/intel/licenses && \
+    ./install.sh --silent=../psxe/silent.cfg
 
 RUN \
     apt-get update -y  && \
