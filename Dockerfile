@@ -2,18 +2,10 @@
 
 FROM ubuntu:18.04
 
-ARG PS=parallel_studio_xe_2020_cluster_edition
 ARG OMPI_DIR=openmpi
 ARG ELPAROOT=elpa
 ARG ELPA_DIR=elpa-2019.11.001
 ARG QE_DIR=qe-6.5
-ARG TOPROOT=/opt/intel
-ARG INTELROOT=$TOPROOT/compilers_and_libraries/linux
-ENV MKLROOT=$INTELROOT/mkl
-ENV TBBROOT=$INTELROOT/tbb
-ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib/x86_64-linux-gnu/:/lib
-ENV LD_LIBRARY_PATH=$INTELROOT/lib/intel64:$MKLROOT/lib/intel64:$TBBROOT/lib/intel64:$LD_LIBRARY_PATH
-ENV PATH=$TOPROOT/bin:$PATH
 ENV COMPILERVARS_ARCHITECTURE="intel64"
 ENV COMPILERVARS_PLATFORM="linux"
 ARG TARGET="SKYLAKE"
@@ -31,12 +23,23 @@ RUN \
     tar -xzf $ELPAROOT/*.tar.gz && \
     rm $ELPAROOT/*.tar.gz
 
+# 选择基础镜像，安装 PS XE。
+ARG PS=parallel_studio_xe_2020_cluster_edition
+
 RUN \
     tar -xzf psxe/$PS.tgz && \
     cd $PS && \
     mkdir /opt/intel && \
     cp ../psxe/psxe.lic /opt/intel/licenses && \
     ./install.sh --silent=../psxe/silent.cfg
+
+ARG TOPROOT=/opt/intel
+ARG INTELROOT=$TOPROOT/compilers_and_libraries/linux
+ENV MKLROOT=$INTELROOT/mkl
+ENV TBBROOT=$INTELROOT/tbb
+ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib/x86_64-linux-gnu/:/lib
+ENV LD_LIBRARY_PATH=$INTELROOT/lib/intel64:$MKLROOT/lib/intel64:$TBBROOT/lib/intel64:$LD_LIBRARY_PATH
+ENV PATH=$TOPROOT/bin:$PATH
 
 RUN \
     apt-get update -y  && \
