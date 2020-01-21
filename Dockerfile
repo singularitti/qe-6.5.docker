@@ -2,26 +2,27 @@
 
 FROM ubuntu:18.04
 
-RUN \
-    wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.2.tar.gz && \
-    tar -xzf openmpi-4.0.2.tar.gz && \
-    rm openmpi-4.0.2.tar.gz && \
-    mv openmpi-4.0.2 openmpi
+WORKDIR /root/
 
+COPY psxe .
+
+RUN ls psxe.lic
+
+# 安装相关依赖包
 RUN \
-    wget -P $ELPAROOT https://elpa.mpcdf.mpg.de/html/Releases/2019.11.001/elpa-2019.11.001.tar.gz && \
-    tar -xzf $ELPAROOT/*.tar.gz && \
-    rm $ELPAROOT/*.tar.gz
+    apt-get update -y  && \
+    apt-get upgrade -y && \
+    apt-get install -y cpio wget make gcc g++ python ssh autotools-dev autoconf automake texinfo libtool patch flex
 
 # 选择基础镜像，安装 PS XE
 ARG PS=parallel_studio_xe_2020_cluster_edition
 
 RUN \
-    tar -xzf psxe/$PS.tgz && \
+    tar -xzf $PS.tgz && \
     cd $PS && \
     mkdir /opt/intel && \
-    cp ../psxe/psxe.lic /opt/intel/licenses && \
-    ./install.sh --silent=../psxe/silent.cfg
+    cp psxe.lic /opt/intel/licenses && \
+    ./install.sh --silent=silent.cfg
 
 ARG TOPROOT=/opt/intel
 ARG INTELROOT=$TOPROOT/compilers_and_libraries/linux
@@ -30,12 +31,6 @@ ENV TBBROOT=$INTELROOT/tbb
 ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib/x86_64-linux-gnu/:/lib
 ENV LD_LIBRARY_PATH=$INTELROOT/lib/intel64:$MKLROOT/lib/intel64:$TBBROOT/lib/intel64:$LD_LIBRARY_PATH
 ENV PATH=$TOPROOT/bin:$PATH
-
-# 安装相关依赖包
-RUN \
-    apt-get update -y  && \
-    apt-get upgrade -y && \
-    apt-get install -y cpio wget make gcc g++ python ssh autotools-dev autoconf automake texinfo libtool patch flex
 
 # 设置环境变量
 ENV COMPILERVARS_ARCHITECTURE="intel64"
@@ -48,6 +43,12 @@ ARG FCFLAGS="-O3 -no-prec-div -fp-model fast=2 -x${TARGET} -align array64byte -t
 
 # 编译 Open MPI
 ARG OMPI_DIR=openmpi
+
+RUN \
+    wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.2.tar.gz && \
+    tar -xzf openmpi-4.0.2.tar.gz && \
+    rm openmpi-4.0.2.tar.gz && \
+    mv openmpi-4.0.2 openmpi
 
 RUN \
     cd $OMPI_DIR && \
@@ -68,6 +69,11 @@ RUN \
 # 编译 ELPA
 ARG ELPAROOT=elpa
 ARG ELPA_DIR=elpa-2019.11.001
+
+RUN \
+    wget -P $ELPAROOT https://elpa.mpcdf.mpg.de/html/Releases/2019.11.001/elpa-2019.11.001.tar.gz && \
+    tar -xzf $ELPAROOT/*.tar.gz && \
+    rm $ELPAROOT/*.tar.gz
 
 RUN \
     cd $ELPA_DIR && \
@@ -95,10 +101,9 @@ RUN \
     make install
 
 # 编译 QE
-ARG QE_DIR=qe-6.5
+ARG QE_DIR=qe
 
 RUN \
-    ln -s q-e-$QE_DIR $QE_DIR && \
     cd $QE_DIR && \
     . compilervars.sh && \
     ./configure \
@@ -117,5 +122,4 @@ RUN \
         --with-elpa-include="${ELPAROOT}/include/${ELPA_DIR}/modules" \
         --with-elpa-lib="${ELPAROOT}/lib/libelpa.a" \
         --with-elpa-version=2016 && \
-    make -j 16 pw && \
     make all
