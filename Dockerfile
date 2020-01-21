@@ -21,8 +21,8 @@ RUN \
     tar -xzf $PS.tgz && \
     cd $PS && \
     mkdir /opt/intel && \
-    cp psxe.lic /opt/intel/licenses && \
-    ./install.sh --silent=silent.cfg
+    cp ../psxe.lic /opt/intel/licenses && \
+    ./install.sh --silent=../silent.cfg
 
 ARG TOPROOT=/opt/intel
 ARG INTELROOT=$TOPROOT/compilers_and_libraries/linux
