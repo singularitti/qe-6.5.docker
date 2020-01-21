@@ -53,7 +53,6 @@ RUN \
 RUN \
     cd $OMPI_DIR && \
     . compilervars.sh && \
-    ./autogen.pl && \
     ./configure \
         --with-cma="no" \
         CC="icc" \
