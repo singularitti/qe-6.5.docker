@@ -1,11 +1,11 @@
 # Referenced from http://itianda.com/2018/08/09/Build-Extreme-performance-Quantum-ESPRESSO-on-Docker-for-Windows/
 
-FROM ubuntu:17.04
+FROM ubuntu:18.04
 
-ARG PS=parallel_studio_xe_2018_update3_cluster_edition
-ARG OMPI_DIR=openmpi-3.1.1
+ARG PS=parallel_studio_xe_2020_cluster_edition
+ARG OMPI_DIR=openmpi
 ARG ELPAROOT=elpa
-ARG ELPA_DIR=elpa-2017.05.003
+ARG ELPA_DIR=elpa-2019.11.001
 ARG QE_DIR=qe-6.5
 ARG TOPROOT=/opt/intel
 ARG INTELROOT=$TOPROOT/compilers_and_libraries/linux
@@ -19,6 +19,17 @@ ENV COMPILERVARS_PLATFORM="linux"
 ARG TARGET="SKYLAKE"
 ARG CCFLAGS="-O3 -no-prec-div -fp-model fast=2 -x${TARGET}"
 ARG FCFLAGS="-O3 -no-prec-div -fp-model fast=2 -x${TARGET} -align array64byte -threads -heap-arrays 4096"
+
+RUN \
+    wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.2.tar.gz && \
+    tar -xzf openmpi-4.0.2.tar.gz && \
+    rm openmpi-4.0.2.tar.gz && \
+    mv openmpi-4.0.2 openmpi
+
+RUN \
+    wget -P $ELPAROOT https://elpa.mpcdf.mpg.de/html/Releases/2019.11.001/elpa-2019.11.001.tar.gz && \
+    tar -xzf $ELPAROOT/*.tar.gz && \
+    rm $ELPAROOT/*.tar.gz
 
 RUN \
     tar -xzf psxe/$PS.tgz && \
