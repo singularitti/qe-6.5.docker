@@ -12,7 +12,8 @@ RUN ls psxe.lic
 RUN \
     apt-get update -y  && \
     apt-get upgrade -y && \
-    apt-get install -y cpio wget make gcc g++ python ssh autotools-dev autoconf automake texinfo libtool patch flex
+    apt-get install -y cpio wget make gcc g++ python ssh autotools-dev autoconf automake texinfo libtool patch flex && \
+    apt-get -qq autoclean && apt-get -qq autoremove
 
 # 选择基础镜像，安装 PS XE
 ARG PS=parallel_studio_xe_2020_cluster_edition
@@ -22,7 +23,8 @@ RUN \
     cd $PS && \
     mkdir /opt/intel && \
     cp ../psxe.lic /opt/intel/licenses && \
-    ./install.sh --silent=../silent.cfg
+    ./install.sh --silent=../silent.cfg && \
+    rm ../$PS.tgz
 
 ARG TOPROOT=/opt/intel
 ARG INTELROOT=$TOPROOT/compilers_and_libraries/linux
