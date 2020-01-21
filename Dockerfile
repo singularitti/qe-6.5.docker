@@ -6,8 +6,6 @@ WORKDIR /root/
 
 COPY psxe .
 
-RUN ls psxe.lic
-
 # 安装相关依赖包
 RUN \
     apt-get update -y  && \
